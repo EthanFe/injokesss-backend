@@ -7,7 +7,7 @@ const defaultState = {
   },
   currentWord: null,
   lettersCollected: [],
-  wordsCompleted: [],
+  wordsCompleted: ["booleanicing", "hell yeah", "word", "fuckingcompleted"],
   pickedWords: []
 }
 
