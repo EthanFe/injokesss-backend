@@ -40,7 +40,10 @@ function setupSockets(game) {
   io.on('connection', (socket) => {
     console.log(socket.id)
     // io.to(socket.id).emit('initialLoadData', game.currentState)
-    game.when('gameUpdate', payload => socket.emit('gameUpdate', {state: payload, socketId: socket.id}))
+    game.when('gameUpdate', payload => {
+      socket.emit('gameUpdate', {state: payload, socketId: socket.id})
+      console.log("Sending game update to" + socket.id)
+    })
 
     console.log('a user connected');
     game.createNewSnake(socket.id)

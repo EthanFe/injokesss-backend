@@ -142,26 +142,26 @@ class Game {
     }
 
     nomLetter(player, letterNomd) {
-        const newLetter = {...letterNomd}
-        newLetter.eaten = true
-
-        const newCurrentWord = {...player.currentWord}
-        newCurrentWord.letters = [...newCurrentWord.letters]
-        newCurrentWord.letters[newCurrentWord.letters.indexOf(letterNomd)] = {...newLetter}
+        letterNomd.eaten = true
         this.setStateForPlayer(player, {
-            currentWord: newCurrentWord,
             lettersCollected: [...player.lettersCollected, letterNomd.letter]
         })
     }
 
     letterSnakeCollidedWith(player) {
         return (
-            player.currentWord.letters.find(letter => {
+            this.allLettersOnBoard.find(letter => {
                 return letter.position.x === this.getSnakePosition(player).x &&
                        letter.position.y === this.getSnakePosition(player).y &&
                        !letter.eaten
             })
         )
+    }
+
+    get allLettersOnBoard() {
+        return this.state.players.reduce((allLetters, player) => {
+            return allLetters.concat(player.currentWord.letters)
+        }, [])
     }
 
     getRandomLetterPosition(takenPositions) {
