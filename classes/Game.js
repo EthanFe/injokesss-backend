@@ -1,4 +1,4 @@
-const { defaultState, injokes, maxWordLength } = require('../data')
+const { defaultState, injokes, maxWordLength, colors } = require('../data')
 const { EventEmitter } = require('./EventEmitter')
 
 class Game {
@@ -41,7 +41,8 @@ class Game {
             currentWord: null,
             lettersCollected: [],
             wordsCompleted: [],
-            socketId: socketId
+            socketId: socketId,
+            color: this.getNextColor(this.state.players.length)
         }
         this.glitterMyBoard(newPlayer)
         this.state.players.push(newPlayer)
@@ -49,6 +50,10 @@ class Game {
 
     destroySnake(socketId) {
         this.state.players.splice(this.state.players.indexOf(this.state.players.find(player => player.socketId === socketId)), 1)
+    }
+
+    getNextColor(playerCount) {
+      return colors[playerCount % colors.length]
     }
 
     setState(newState) {

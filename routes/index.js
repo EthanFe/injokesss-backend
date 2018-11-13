@@ -1,5 +1,4 @@
 const { Game } = require('../classes/Game')
-const { colors } = require('../data')
 
 var express = require('express');
 var router = express.Router();
@@ -16,16 +15,6 @@ function start() {
   
   setupSockets(game)
   game.start()
-}
-
-function addConnectedUser(connectedUsers, socketID) {
-  game.createNewSnake(socketID)
-  connectedUsers.push({socketID: socketID, color: getNextColor(connectedUsers.length)})
-
-}
-
-function getNextColor(playerCount) {
-  colors[playerCount % colors.length]
 }
 
 function setupSockets(game) {
