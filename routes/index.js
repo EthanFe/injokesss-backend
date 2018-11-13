@@ -29,8 +29,6 @@ function getNextColor(playerCount) {
 }
 
 function setupSockets(game) {
-  game.when('gameUpdate', payload => io.emit('gameUpdate', payload))
-
   const http = require('http').Server(express);
   // const io = require('socket.io')(http);
 
@@ -42,11 +40,13 @@ function setupSockets(game) {
   io.on('connection', (socket) => {
     console.log(socket.id)
     // io.to(socket.id).emit('initialLoadData', game.currentState)
+    game.when('gameUpdate', payload => socket.emit('gameUpdate', {state: payload, socketId: socket.id}))
 
     console.log('a user connected');
     game.createNewSnake(socket.id)
+    socket.emit('initialLoadData', {state: game.currentState, socketId: socket.id})
 
-    socket.emit('initialLoadData', game.currentState)
+
     socket.on('changeFacing', function(newFacing){
       game.changeFacing(socket.id, newFacing)
     });
