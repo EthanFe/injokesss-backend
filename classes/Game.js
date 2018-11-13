@@ -9,7 +9,7 @@ class Game {
 
     start() {
       this.pause()
-      this.interval = setInterval(this.runGameLoop.bind(this), 300)
+      this.interval = setInterval(this.runGameLoop.bind(this), 100)
     }
 
     pause() {
@@ -73,6 +73,7 @@ class Game {
     }
 
     runGameLoop() {
+        const startTime = new Date().getTime()
         for (const player of this.state.players) {
             this.updateSnakePosition(player)
             // if (player.currentWord === null) {
@@ -86,9 +87,9 @@ class Game {
                     this.finishWord(player)
                 }
             }
-
-            this.trigger('gameUpdate', this.currentState)
         }
+        this.trigger('gameUpdate', this.currentState)
+        console.log(`Time taken for tick: ${new Date().getTime() - startTime}ms`)
     }
 
     currentWordIsComplete(player) {

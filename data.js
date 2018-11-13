@@ -47,10 +47,10 @@ const injokes = [
   "perfectcode"
 ]
 
-// const maxWordLength = injokes.reduce(
-//   (word1, word2) => word1.length > word2.length ? word1 : word2
-//   )
-const maxWordLength = 50
+const maxWordLength = injokes.reduce(
+  (word1, word2) => word1.length > word2.length ? word1 : word2
+  )
+// const maxWordLength = 50
 
 const colors = [
   "#ef5777",
