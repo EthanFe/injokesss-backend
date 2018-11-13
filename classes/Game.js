@@ -9,7 +9,7 @@ class Game {
 
     start() {
       this.pause()
-      this.interval = setInterval(this.runGameLoop.bind(this), 100)
+      this.interval = setInterval(this.runGameLoop.bind(this), 300)
     }
 
     pause() {
@@ -45,6 +45,10 @@ class Game {
         }
         this.glitterMyBoard(newPlayer)
         this.state.players.push(newPlayer)
+    }
+
+    destroySnake(socketId) {
+        this.state.players.splice(this.state.players.indexOf(this.state.players.find(player => player.socketId === socketId)), 1)
     }
 
     setState(newState) {
