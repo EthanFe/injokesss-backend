@@ -1,23 +1,31 @@
 const { Game } = require('../classes/Game')
+const { colors } = require('../data')
 
 var express = require('express');
 var router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'snakegame' });
-});
+// /* GET home page. */
+// router.get('/', function(req, res, next) {
+//   res.render('index', { title: 'snakegame' });
+// });
 
 module.exports = router;
 
 function start() {
-  // // SavedGame.remove({}, () => {})
-  // const game = await findOrCreateSaveGame()
-  // game.ready()
   const game = new Game
   
-  const socket = setupSockets(game)
+  setupSockets(game)
   game.start()
+}
+
+function addConnectedUser(connectedUsers, socketID) {
+  game.createNewSnake(socketID)
+  connectedUsers.push({socketID: socketID, color: getNextColor(connectedUsers.length)})
+
+}
+
+function getNextColor(playerCount) {
+  colors[playerCount % colors.length]
 }
 
 function setupSockets(game) {
@@ -32,13 +40,23 @@ function setupSockets(game) {
   const io = require('socket.io').listen(server);
 
   io.on('connection', (socket) => {
-    io.to(socket.id).emit('initialLoadData', game.currentState)
+    console.log(socket.id)
+    // io.to(socket.id).emit('initialLoadData', game.currentState)
 
     console.log('a user connected');
+    game.createNewSnake(socket.id)
 
+    socket.emit('initialLoadData', game.currentState)
     socket.on('changeFacing', function(newFacing){
-      game.changeFacing(newFacing)
+      game.changeFacing(socket.id, newFacing)
     });
+    socket.on('pause', function(){
+      game.pause()
+    });
+    socket.on('resume', function(){
+      game.start()
+    });
+
     socket.on('disconnect', function(){
       console.log('user disconnected');
     });

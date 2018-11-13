@@ -1,4 +1,4 @@
-const { defaultState, injokes } = require('../data')
+const { defaultState, injokes, maxWordLength } = require('../data')
 const { EventEmitter } = require('./EventEmitter')
 
 class Game {
@@ -8,11 +8,16 @@ class Game {
     }
 
     start() {
-      setInterval(this.runGameLoop.bind(this), 100)
+      this.pause()
+      this.interval = setInterval(this.runGameLoop.bind(this), 100)
+    }
+
+    pause() {
+      clearInterval(this.interval)
     }
 
     get currentState() {
-      return this.state
+      return this.state.players
     }
 
     get when() {
@@ -23,52 +28,84 @@ class Game {
       return this.events.emit.bind(this.events)
     }
 
+    createNewSnake(socketId) {
+        this.pause()
+
+        const newPlayer = {
+            snake: {
+                facing: {x: 0, y: 1},
+                history: [
+                    {x: 5, y: 17},
+                ]
+            },
+            currentWord: null,
+            lettersCollected: [],
+            wordsCompleted: [],
+            socketId: socketId
+        }
+        this.glitterMyBoard(newPlayer)
+        this.state.players.push(newPlayer)
+    }
+
     setState(newState) {
       for (const key in newState) {
         this.state[key] = newState[key]
       }
     }
 
-    changeFacing(newFacing) {
-      this.state.snake.facing = newFacing
+    setStateForPlayer(player, newState) {
+      for (const key in newState) {
+        player[key] = newState[key]
+      }
+    }
+
+    changeFacing(socketId, newFacing) {
+        this.state.players.find(player => player.socketId === socketId).snake.facing = newFacing
     }
 
     runGameLoop() {
-        const { currentWord } = this.state
+        for (const player of this.state.players) {
+            this.updateSnakePosition(player)
+            // if (player.currentWord === null) {
+            //     this.glitterMyBoard(player)
+            // }
 
-        this.updateSnakePosition()
-        if (currentWord === null) {
-            this.glitterMyBoard()
-        }
-
-        const letterNomd = this.onTopOfLetter()
-        if (letterNomd !== undefined) {
-            this.nomLetter(currentWord, letterNomd)
-            if (this.currentWordIsComplete()) {
-                this.finishWord()
+            const letterNomd = this.letterSnakeCollidedWith(player)
+            if (letterNomd !== undefined) {
+                this.nomLetter(player, letterNomd)
+                if (this.currentWordIsComplete(player)) {
+                    this.finishWord(player)
+                }
             }
+
+            this.trigger('gameUpdate', this.currentState)
         }
-
-        this.trigger('gameUpdate', this.currentState)
     }
 
-    currentWordIsComplete() {
-        return this.state.lettersCollected.length === this.state.currentWord.word.length
+    currentWordIsComplete(player) {
+        return player.lettersCollected.length === player.currentWord.word.length
     }
 
-    finishWord() {
+    finishWord(player) {
         const newWord = this.pickRandomWord()
         const newCurrentWord = this.makeCurrentWordObject(newWord)
-        this.setState({
-            wordsCompleted: [...this.state.wordsCompleted, this.state.lettersCollected.join("")],
+        this.setStateForPlayer(player, {
+            wordsCompleted: [...player.wordsCompleted, player.lettersCollected.join("")],
             currentWord: newCurrentWord,
             lettersCollected: []
         })
     }
 
+    glitterMyBoard(player) {
+        const word = this.pickRandomWord()
+        this.setStateForPlayer(player, {
+            currentWord: this.makeCurrentWordObject(word)
+        })
+    }
+
     makeCurrentWordObject(word) {
         const currentWord = {word: word, letters: []}
-        const takenPositions = {}
+        const takenPositions = this.getCurrentlyOccupiedSpaces()
         for (const letter of word.split("")) {
             const position = this.getRandomLetterPosition(takenPositions)
             takenPositions[JSON.stringify(position)] = true
@@ -79,6 +116,18 @@ class Game {
             })
         }
         return currentWord
+    }
+
+    getCurrentlyOccupiedSpaces() {
+        const occupiedSpaces = {}
+        for (const player of this.state.players) {
+            if (player.currentWord !== null) {
+                for (const letter of player.currentWord.letters) {
+                    occupiedSpaces[JSON.stringify(letter.position)] = true
+                }
+            }
+        }
+        return occupiedSpaces
     }
 
     pickRandomWord() {
@@ -92,32 +141,27 @@ class Game {
         }
     }
 
-    nomLetter(currentWord, letterNomd) {
+    nomLetter(player, letterNomd) {
         const newLetter = {...letterNomd}
         newLetter.eaten = true
 
-        const newCurrentWord = {...currentWord}
+        const newCurrentWord = {...player.currentWord}
         newCurrentWord.letters = [...newCurrentWord.letters]
         newCurrentWord.letters[newCurrentWord.letters.indexOf(letterNomd)] = {...newLetter}
-        this.setState({
+        this.setStateForPlayer(player, {
             currentWord: newCurrentWord,
-            lettersCollected: [...this.state.lettersCollected, letterNomd.letter]
+            lettersCollected: [...player.lettersCollected, letterNomd.letter]
         })
     }
 
-    onTopOfLetter() {
+    letterSnakeCollidedWith(player) {
         return (
-            this.state.currentWord.letters.find(letter => {
-                return letter.position.x === this.getSnakePosition().x &&
-                       letter.position.y === this.getSnakePosition().y &&
+            player.currentWord.letters.find(letter => {
+                return letter.position.x === this.getSnakePosition(player).x &&
+                       letter.position.y === this.getSnakePosition(player).y &&
                        !letter.eaten
             })
         )
-    }
-
-    glitterMyBoard() {
-        const word = this.pickRandomWord()
-        this.setState({currentWord: this.makeCurrentWordObject(word)})
     }
 
     getRandomLetterPosition(takenPositions) {
@@ -131,10 +175,10 @@ class Game {
         return position
     }
 
-    updateSnakePosition() {
-        const snakeState = {...this.state.snake}
-        const newPos = {x: this.getSnakePosition().x + this.state.snake.facing.x,
-                        y: this.getSnakePosition().y + this.state.snake.facing.y}
+    updateSnakePosition(player) {
+        const snakeState = {...player.snake}
+        const newPos = {x: this.getSnakePosition(player).x + player.snake.facing.x,
+                        y: this.getSnakePosition(player).y + player.snake.facing.y}
         if (newPos.x > 19)
             newPos.x = 0
         if (newPos.x < 0)
@@ -144,32 +188,14 @@ class Game {
         if (newPos.y < 0)
             newPos.y = 19
         snakeState.history.unshift(newPos)
-        this.setState({snake: snakeState})
+        // get rid of old history if it's longer than needed to display tails
+        if (snakeState.history.length > maxWordLength)
+            snakeState.history.pop()
+        this.setStateForPlayer(player, {snake: snakeState})
     }
 
-    getSnakePosition() {
-        return this.state.snake.history[0]
-    }
-
-    onKeyDown(event) {
-        const snakeState = {...this.state.snake}
-        switch (event.key) {
-            case "ArrowUp":
-                snakeState.facing = {x: 0, y: -1}
-                break;
-            case "ArrowDown":
-                snakeState.facing = {x: 0, y: 1}
-                break;
-            case "ArrowLeft":
-                snakeState.facing = {x: -1, y: 0}
-                break;
-            case "ArrowRight":
-                snakeState.facing = {x: 1, y: 0}
-                break;
-            default:
-
-        }
-        this.setState({snake: snakeState})
+    getSnakePosition(player) {
+        return player.snake.history[0]
     }
 }
 
