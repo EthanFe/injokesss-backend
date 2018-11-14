@@ -66,7 +66,7 @@ class Game {
                 {x: 5, y: 17},
             ]
         }
-        this.glitterMyBoard(player)
+        // this.glitterMyBoard(player)
     }
 
     removePlayer(socketId) {
@@ -123,11 +123,29 @@ class Game {
         if (this.state.msUntilWordChange <= 0) {
             this.state.msUntilWordChange = 30 * 1000
             this.swapperoniAssignedWords()
+            this.state.wordVotes = {}
         }
     }
 
     swapperoniAssignedWords() {
+        const wordsToAssign = this.getTopVotedWords()
+        while (wordsToAssign.length < this.activePlayers.length) {
+            wordsToAssign.push(this.pickRandomWord())
+        }
+        for (const player of this.activePlayers) {
+            this.finishWord(player)
+            this.assignNewWord(player, wordsToAssign[this.activePlayers.indexOf(player)]) // change this janky shit to randomly assign
+        }
+    }
 
+    // this should break ties randomly instead of whatever sort is doing (probably leaving them in whatever order from the object)
+    getTopVotedWords() {
+        const votesArray = []
+        for (const word in this.state.wordVotes) {
+            votesArray.push({word: word, votes: this.state.wordVotes[word]})
+        }
+        const sortedVotes = votesArray.sort((word1, word2) => word1.votes - word2.votes).map(word => word.word)
+        return sortedVotes.slice(0, this.activePlayers.length)
     }
 
     currentWordIsComplete(player) {
@@ -135,21 +153,25 @@ class Game {
     }
 
     finishWord(player) {
-        const newWord = this.pickRandomWord()
-        const newCurrentWord = this.makeCurrentWordObject(newWord)
         this.setStateForPlayer(player, {
             wordsCompleted: [...player.wordsCompleted, player.lettersCollected.join("")],
-            currentWord: newCurrentWord,
             lettersCollected: []
         })
     }
 
-    glitterMyBoard(player) {
-        const word = this.pickRandomWord()
+    assignNewWord(player, newWord) {
+        const newCurrentWord = this.makeCurrentWordObject(newWord)
         this.setStateForPlayer(player, {
-            currentWord: this.makeCurrentWordObject(word)
+            currentWord: newCurrentWord,
         })
     }
+
+    // glitterMyBoard(player) {
+    //     const word = this.pickRandomWord()
+    //     this.setStateForPlayer(player, {
+    //         currentWord: this.makeCurrentWordObject(word)
+    //     })
+    // }
 
     makeCurrentWordObject(word) {
         const currentWord = {word: word, letters: []}
@@ -211,7 +233,10 @@ class Game {
 
     get allLettersOnBoard() {
         return this.activePlayers.reduce((allLetters, player) => {
-            return allLetters.concat(player.currentWord.letters)
+            if (player.currentWord !== null)
+                return allLetters.concat(player.currentWord.letters)
+            else
+                return allLetters
         }, [])
     }
 

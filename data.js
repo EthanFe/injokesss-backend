@@ -13,7 +13,7 @@ const defaultState = {
     // }
   ],
   pickedWords: [],
-  wordVotes: [],
+  wordVotes: {},
   msUntilWordChange: 30 * 1000
 }
 
