@@ -53,7 +53,7 @@ class Game {
         this.glitterMyBoard(player)
     }
 
-    destroySnake(socketId) {
+    removePlayer(socketId) {
         this.state.players.splice(this.state.players.indexOf(this.state.players.find(player => player.socketId === socketId)), 1)
     }
 

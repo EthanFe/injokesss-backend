@@ -55,7 +55,7 @@ function setupSockets(game) {
     });
 
     socket.on('disconnect', function(){
-      game.destroySnake(socket.id)
+      game.removePlayer(socket.id)
       console.log('user disconnected');
     });
   });
