@@ -28,24 +28,29 @@ class Game {
       return this.events.emit.bind(this.events)
     }
 
-    createNewSnake(socketId) {
-        this.pause()
-
+    createNewPlayer(socketId) {
         const newPlayer = {
-            snake: {
-                facing: {x: 0, y: 1},
-                history: [
-                    {x: 5, y: 17},
-                ]
-            },
+            snake: null,
             currentWord: null,
             lettersCollected: [],
             wordsCompleted: [],
             socketId: socketId,
             color: this.getNextColor(this.state.players.length)
         }
-        this.glitterMyBoard(newPlayer)
         this.state.players.push(newPlayer)
+    }
+
+    createSnake(socketId) {
+        this.pause()
+
+        const player = this.state.players.find(player => player.socketId === socketId)
+        player.snake = {
+            facing: {x: 0, y: 1},
+            history: [
+                {x: 5, y: 17},
+            ]
+        }
+        this.glitterMyBoard(player)
     }
 
     destroySnake(socketId) {
@@ -69,7 +74,9 @@ class Game {
     }
 
     changeFacing(socketId, newFacing) {
-        this.state.players.find(player => player.socketId === socketId).snake.facing = newFacing
+        const player = this.state.players.find(player => player.socketId === socketId)
+        if (player.snake !== null)
+            player.snake.facing = newFacing
     }
 
     runGameLoop() {

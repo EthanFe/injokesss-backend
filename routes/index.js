@@ -35,13 +35,18 @@ function setupSockets(game) {
     })
 
     console.log('a user connected');
-    game.createNewSnake(socket.id)
+    game.createNewPlayer(socket.id)
+    // game.createNewSnake(socket.id)
     socket.emit('initialLoadData', {state: game.currentState, socketId: socket.id})
 
 
+    socket.on('joinGame', function(){
+      game.createSnake(socket.id)
+    });
     socket.on('changeFacing', function(newFacing){
       game.changeFacing(socket.id, newFacing)
     });
+
     socket.on('pause', function(){
       game.pause()
     });
