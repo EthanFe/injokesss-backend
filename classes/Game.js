@@ -66,7 +66,8 @@ class Game {
                 {x: 5, y: 17},
             ]
         }
-        // this.glitterMyBoard(player)
+
+        this.trigger('gameUpdate', this.currentState)
     }
 
     removePlayer(socketId) {
@@ -100,9 +101,6 @@ class Game {
         for (const player of this.state.players) {
             if (player.snake !== null) {
                 this.updateSnakePosition(player)
-                // if (player.currentWord === null) {
-                //     this.glitterMyBoard(player)
-                // }
 
                 const letterNomd = this.letterSnakeCollidedWith(player)
                 if (letterNomd !== undefined) {
@@ -165,13 +163,6 @@ class Game {
             currentWord: newCurrentWord,
         })
     }
-
-    // glitterMyBoard(player) {
-    //     const word = this.pickRandomWord()
-    //     this.setStateForPlayer(player, {
-    //         currentWord: this.makeCurrentWordObject(word)
-    //     })
-    // }
 
     makeCurrentWordObject(word) {
         const currentWord = {word: word, letters: []}
