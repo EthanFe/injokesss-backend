@@ -66,6 +66,7 @@ class Game {
                 {x: 5, y: 17},
             ]
         }
+        player.score = 0
 
         this.trigger('gameUpdate', this.currentState)
     }
@@ -151,10 +152,32 @@ class Game {
     }
 
     finishWord(player) {
+        this.addScore(player)
         this.setStateForPlayer(player, {
             wordsCompleted: [...player.wordsCompleted, player.lettersCollected.join("")],
             lettersCollected: []
         })
+    }
+
+    addScore(player) {
+        if (player.currentWord !== null) {
+            const word = player.currentWord.word
+            const subStrings = this.getSubstringsOfWord(word)
+            // const collectedSubstrings = 
+            const lettersCollected = player.lettersCollected
+            console.log(this.getSubstringsOfWord(word))
+        }
+    }
+
+    // this algorithm isnt quite right but w/e
+    getSubstringsOfWord(word) {
+        const substrings = []
+        for (let start = 0; start < word.length - 1; start++) {
+            for (let end = start + 1; end < word.length + 1; end++) {
+                substrings.push(word.slice(start, end))
+            }
+        }
+        return substrings
     }
 
     assignNewWord(player, newWord) {
