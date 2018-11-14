@@ -17,7 +17,7 @@ class Game {
     }
 
     get currentState() {
-      return this.state.players.filter(player => player.snake !== null)
+      return {players: this.state.players.filter(player => player.snake !== null), timer: this.state.msUntilWordChange}
     }
 
     get when() {
@@ -32,7 +32,6 @@ class Game {
         message = this.truncateMessage(message)
         this.state.wordVotes[message] = this.state.wordVotes[message] || 0
         this.state.wordVotes[message]++
-        console.log(this.state.wordVotes)
     }
 
     truncateMessage(message) {
@@ -108,8 +107,21 @@ class Game {
                 }
             }
         }
+        this.incrementCountdownTimer()
         this.trigger('gameUpdate', this.currentState)
         console.log(`Time taken for tick: ${new Date().getTime() - startTime}ms`)
+    }
+
+    incrementCountdownTimer() {
+        this.state.msUntilWordChange -= 100
+        if (this.state.msUntilWordChange <= 0) {
+            this.state.msUntilWordChange = 30 * 1000
+            this.swapperoniAssignedWords()
+        }
+    }
+
+    swapperoniAssignedWords() {
+
     }
 
     currentWordIsComplete(player) {

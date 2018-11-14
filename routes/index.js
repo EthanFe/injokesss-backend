@@ -50,7 +50,7 @@ function setupSockets(game) {
 
     socket.on('sendMessage', function(message){
       game.addVote(message)
-      socket.emit('messageSent', message)
+      io.emit('messageSent', message)
     });
 
     socket.on('pause', function(){
