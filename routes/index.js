@@ -48,6 +48,11 @@ function setupSockets(game) {
       game.changeFacing(socket.id, newFacing)
     });
 
+    socket.on('sendMessage', function(message){
+      game.addVote(message)
+      socket.emit('messageSent', message)
+    });
+
     socket.on('pause', function(){
       game.pause()
     });

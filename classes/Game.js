@@ -28,6 +28,17 @@ class Game {
       return this.events.emit.bind(this.events)
     }
 
+    addVote(message) {
+        message = this.truncateMessage(message)
+        this.state.wordVotes[message] = this.state.wordVotes[message] || 0
+        this.state.wordVotes[message]++
+        console.log(this.state.wordVotes)
+    }
+
+    truncateMessage(message) {
+        return message.slice(0, 50)
+    }
+
     createNewPlayer(socketId) {
         const newPlayer = {
             snake: null,

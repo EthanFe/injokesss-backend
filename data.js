@@ -12,7 +12,8 @@ const defaultState = {
       // wordsCompleted: ["booleanicing", "hell yeah", "word", "fuckingcompleted"],
     // }
   ],
-  pickedWords: []
+  pickedWords: [],
+  wordVotes: []
 }
 
 const injokes = [
