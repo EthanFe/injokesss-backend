@@ -21,7 +21,7 @@ function setupSockets(game) {
   const http = require('http').Server(express);
   // const io = require('socket.io')(http);
 
-  const server = http.listen(3000, function(){
+  const server = http.listen(process.env.PORT || 3000, function(){
     console.log('listening on *:3000');
   });
   const io = require('socket.io').listen(server);
