@@ -12,7 +12,7 @@ module.exports = router;
 
 function start() {
   const game = new Game
-  
+
   setupSockets(game)
   game.start()
 }
@@ -41,6 +41,7 @@ function setupSockets(game) {
 
 
     socket.on('joinGame', function(){
+        console.log("joinin da game " + socket.id)
       game.createSnake(socket.id)
     });
     socket.on('changeFacing', function(newFacing){

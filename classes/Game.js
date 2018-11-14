@@ -17,7 +17,7 @@ class Game {
     }
 
     get currentState() {
-      return this.state.players
+      return this.state.players.filter(player => player.snake !== null)
     }
 
     get when() {
@@ -82,16 +82,18 @@ class Game {
     runGameLoop() {
         const startTime = new Date().getTime()
         for (const player of this.state.players) {
-            this.updateSnakePosition(player)
-            // if (player.currentWord === null) {
-            //     this.glitterMyBoard(player)
-            // }
+            if (player.snake !== null) {
+                this.updateSnakePosition(player)
+                // if (player.currentWord === null) {
+                //     this.glitterMyBoard(player)
+                // }
 
-            const letterNomd = this.letterSnakeCollidedWith(player)
-            if (letterNomd !== undefined) {
-                this.nomLetter(player, letterNomd)
-                if (this.currentWordIsComplete(player)) {
-                    this.finishWord(player)
+                const letterNomd = this.letterSnakeCollidedWith(player)
+                if (letterNomd !== undefined) {
+                    this.nomLetter(player, letterNomd)
+                    if (this.currentWordIsComplete(player)) {
+                        this.finishWord(player)
+                    }
                 }
             }
         }
@@ -149,7 +151,7 @@ class Game {
 
     pickRandomWord() {
         let validWords = injokes.filter(word => !this.state.pickedWords.includes(word))
-        
+
         if (validWords.length <= 0) {
             // fuck it just cycle them all through again
             this.setState({pickedWords: []})
