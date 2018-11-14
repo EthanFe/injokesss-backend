@@ -145,7 +145,7 @@ class Game {
         for (const word in this.state.wordVotes) {
             votesArray.push({word: word, votes: this.state.wordVotes[word]})
         }
-        const sortedVotes = votesArray.sort((word1, word2) => word1.votes - word2.votes).map(word => word.word)
+        const sortedVotes = votesArray.sort((word1, word2) => word2.votes - word1.votes).map(word => word.word)
         return sortedVotes.slice(0, this.activePlayers.length)
     }
 
