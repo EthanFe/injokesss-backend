@@ -142,13 +142,16 @@ class Game {
 
     pickRandomWord() {
         const validWords = injokes.filter(word => !this.state.pickedWords.includes(word))
-        if (validWords.length > 0) {
-            const word = validWords[Math.floor(Math.random() * validWords.length)]
-            this.setState({pickedWords: [...this.state.pickedWords, word]})
-            return word
-        } else {
-            console.error("idk deal with this later")
+        
+        if (validWords.length <= 0) {
+            // fuck it just cycle them all through again
+            this.setState({pickedWords: []})
+            const validWords = injokes
         }
+
+        const word = validWords[Math.floor(Math.random() * validWords.length)]
+        this.setState({pickedWords: [...this.state.pickedWords, word]})
+        return word
     }
 
     nomLetter(player, letterNomd) {
