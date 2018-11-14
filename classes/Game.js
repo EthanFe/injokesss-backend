@@ -33,7 +33,9 @@ class Game {
     }
 
     addVote(message) {
-        if (message !== null) {
+        // i know regexes you guys
+        message = message.replace(/\s+/g, '');
+        if (message !== null && message !== "") {
             message = this.truncateMessage(message)
             this.state.wordVotes[message] = this.state.wordVotes[message] || 0
             this.state.wordVotes[message]++
@@ -160,12 +162,17 @@ class Game {
     }
 
     addScore(player) {
-        if (player.currentWord !== null) {
+        if (player.currentWord !== null && player.lettersCollected.length > 0) {
             const word = player.currentWord.word
-            const subStrings = this.getSubstringsOfWord(word)
-            // const collectedSubstrings = 
             const lettersCollected = player.lettersCollected
-            console.log(this.getSubstringsOfWord(word))
+
+            const subStrings = this.getSubstringsOfWord(word)
+            const collectedSubStrings = subStrings.filter(substring => lettersCollected.join("").includes(substring))
+            if (collectedSubStrings.length > 0) {
+                const sortedSubStrings = collectedSubStrings.sort((string1, string2) => string2.length - string1.length)
+                const score = sortedSubStrings[0].length
+                player.score += score
+            }
         }
     }
 
