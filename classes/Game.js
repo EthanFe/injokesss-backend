@@ -17,7 +17,11 @@ class Game {
     }
 
     get currentState() {
-      return {players: this.state.players.filter(player => player.snake !== null), timer: this.state.msUntilWordChange}
+      return {players: this.activePlayers, timer: this.state.msUntilWordChange}
+    }
+
+    get activePlayers() {
+        return this.state.players.filter(player => player.snake !== null)
     }
 
     get when() {
@@ -29,9 +33,11 @@ class Game {
     }
 
     addVote(message) {
-        message = this.truncateMessage(message)
-        this.state.wordVotes[message] = this.state.wordVotes[message] || 0
-        this.state.wordVotes[message]++
+        if (message !== null) {
+            message = this.truncateMessage(message)
+            this.state.wordVotes[message] = this.state.wordVotes[message] || 0
+            this.state.wordVotes[message]++
+        }
     }
 
     truncateMessage(message) {
@@ -204,7 +210,7 @@ class Game {
     }
 
     get allLettersOnBoard() {
-        return this.state.players.reduce((allLetters, player) => {
+        return this.activePlayers.reduce((allLetters, player) => {
             return allLetters.concat(player.currentWord.letters)
         }, [])
     }
