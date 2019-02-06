@@ -1,14 +1,15 @@
 const { Game } = require('../classes/Game')
 
 var express = require('express');
-var router = express.Router();
+var app = express();
+app.use('/', express.static('build'))
 
 // /* GET home page. */
-// router.get('/', function(req, res, next) {
+// app.get('/', function(req, res, next) {
 //   res.render('index', { title: 'snakegame' });
 // });
 
-module.exports = router;
+module.exports = app;
 
 function start() {
   const game = new Game
@@ -18,11 +19,12 @@ function start() {
 }
 
 function setupSockets(game) {
-  const http = require('http').Server(express);
+  const http = require('http').Server(app);
   // const io = require('socket.io')(http);
 
-  const server = http.listen(3000, function(){
-    console.log('listening on *:3000');
+  const port = 80
+  const server = http.listen(port, function(){
+    console.log(`listening on *:${port}`);
   });
   const io = require('socket.io').listen(server);
 
